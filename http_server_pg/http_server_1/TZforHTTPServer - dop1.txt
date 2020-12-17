@@ -1,0 +1,110 @@
+ДОПОЛНЕНИЕ №1 к ТЗ на HTTP-сервер:
+
+1) 	отключить все тесты, которые не относятся к insert;
+
+2) 	в MyController во все методы (кроме select) добавить body в качестве аргумента (должны принимать body);
+
+3) 	в MyController во все методы (кроме select) добавить body в return (должны возвращать body);
+
+4) 	в MyController метод Distributor переименовать на redirect;
+
+5) 	в корневой папке сервера создать папку DAO
+
+6) 		в ней создать файлы user.py и product.py
+
+7) 		в модуле user.py создать класс UserDao
+
+8) 		и перенести в него все методы для user
+
+9) 		в модуле product.py создать класс ProductDao
+
+10) 	и перенести в него все методы для user
+
+11)	в конструкторе __init__ класса MyController инициировать классы UserDao и ProductDao
+
+12)	в методе redirect класса MyController - в elif-ах - переписать ссылки на методы user... и product... на соответствующие ссылки методов в классах UserDao и ProductDao. После переноса этих методов ПЕРЕНАЗЫВАЕМ ИХ.
+
+13)	Заменить имена методов - убрать Jhon, оставить только сами названия операторов запросов;
+
+14)	в методе InsertJhon из return убрать передачу остатка пути. Оставить только передачу ТЕЛА (как ответа базы).
+
+15) 	в файле "dbhttpserver\testunit\Entities\Users.py" создать класс "UserDto";
+
+16)	в классе UserDto определить 5 полей:
+	'id'
+	'name' 
+	'lastName'
+	'age'
+	'address'
+
+17) 	в фикстуре fixtureHTTPPostUsersInsertJhonSmith создать объект Jhon с параметрами (25, "Jhon", "Smith", 4, "USA, Whashington, st.Cooler, 75") класса Users и сериализовать его для получения блока данных myBODY в формате JSON;
+
+18)	в фикстуре fixtureHTTPPostUsersInsertJhonSmith создать объект JhonDto с параметрами (19444, "Jhon", "Smith", 4, "USA, Whashington, st.Cooler, 75") класса UserDto и сериализовать его для получения блока данных myBodyDto в формате JSON.
+
+19) на стороне сервера в MyController создать класс UserDto;
+
+20) в классе UserDto определить 5 полей:
+	'id'
+	'name' 
+	'lastName'
+	'age'
+	'address'
+
+21) создать объект JhonDto с параметрами (19444, "Jhon", "Smith", 4, "USA, Whashington, st.Cooler, 75") класса UserDto и сериализовать его для получения блока данных с именем respBodyJhon в формате JSON;
+
+22) respBodyJhon должен передаваться в метод do_POST как блок JSON, который потом должен отправляться в качестве ответа сервера на запрос клиента (теста или инсомнии). 
+
+23) в тесте сравнение будет вестись между myBodyDto из фикстуры и myBodyDto из ответа сервера.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

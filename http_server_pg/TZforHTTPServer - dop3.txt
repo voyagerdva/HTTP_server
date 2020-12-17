@@ -1,0 +1,112 @@
+ДОПОЛНЕНИЕ №3 к ТЗ на HTTP-сервер:
+
+1)	URL в BaseDao разбить на части в соответствии со структурой URL в HTTP-протоколе и для каждой части ввести литеральную константу, и URL формировать уже с помощью этих констант.
+
+2)	Сделать так, чтобы запрос ins в методе insert класса UserDao сам формировал и возвращал отчет о том, какую запись с какими полями он только что вставил в таблицу. Этот ответ метод insert должен возвращать в контроллер.
+
+3)	на стороне сервера - в корневой папке создать папку Entities, в ней создать файл (модуль) user.py.
+
+4)	в модуле Entities/user.py создать класс User и определить в нем 5 полей:
+	'id'
+	'name' 
+	'lastName'
+	'age'
+	'address'
+
+5)	организовать движение данных по следующей схеме:
+
+		- с клиента приходит json блок данных по какому-то юзеру.
+		
+		- MyController по этим данным создает объект класса User в Entities.
+		
+		- MyController этот объект отправляет в UserDao, в метод insert (пока что только insert), 
+		
+		- метод Insert с помощью геттеров получает значения полей объекта User и отправляет в базу/таблицу запрос insert с этими данными на добавление записи (выполняется отложенный запрос: ins = prepare() , затем ins()), 
+		
+		- ins возвращает значение поля id только-что добавленной записи;
+		
+		- этот id из ins, с помощью setter_id, вставляется  вместо старого значения, в поле id объекта Iser, созданного перед отправкой в базу, 
+		
+		- обновленный объект User, с обновленным id из базы, передается в MyController;
+		
+		- MyController из значений этого объекта User Entiti формирует объект класса UserDto, при этом заполняются не все поля, а только определенные - например - id, firstname, lastname.
+		
+		- MyController сериализует объект UserDto, формирует json ответ для сервера и отправляет в сервер;
+		
+		- сервер просто вкладывает этот json с юзеромDTO в свой ответ клиенту и отправляет клиенту.
+
+
+public MarketAccount getAccountById(Integer id) {
+        if (id == null) {
+            throw  LogicMarketException.create(logger, MarketAccountLogicErrors.LOGIC_MARKETACCCOUNT_ID_IS_NULL_ERROR);
+
+        }
+
+        MarketAccount account = mMarketAccountDAO.getById(id);
+
+        if (account == null) {
+            throw  LogicMarketException.create(logger, MarketAccountLogicErrors.LOGIC_MARKETACCOUNT_REQUESTED_ID_ABSCENT);
+
+        }
+
+        return account;
+    }
+
+вот эта строчка -
+
+MarketAccount account = mMarketAccountDAO.getById(id);
+
+дао берет id и по нему возвращает объект.
+
+или вот метод который создает сущность
+
+public MarketLegalEntityDto add(MarketLegalEntityUpdateDto legalEntityDto) {
+        AdminUser adminUser = getCurrentAdmin();
+        checkIfNamesAreUsed(legalEntityDto);
+        MarketLegalEntity legalEntity = MarketLegalEntityUpdateDto.create(legalEntityDto, adminUser);
+        legalEntity.setActive(false);
+        if (legalEntityDto.toponymId != null) {
+            Toponym toponym = toponymLogic.tryGetById(legalEntityDto.toponymId);
+            legalEntity.setLocation(toponym);
+        }
+        legalEntity.setAddress(legalEntityDto.address);        
+        
+        legalEntity.setServiceDescriptor(createServiceDescriptor(ServiceDescriptorType.SERVICE));
+        legalEntity.setComissionDescriptor(createServiceDescriptor(ServiceDescriptorType.COMISSION));
+        legalEntity.setTaxDescriptor(createServiceDescriptor(ServiceDescriptorType.LEGAL_TAX));
+        legalEntity.setUserTaxDescriptor(createServiceDescriptor(ServiceDescriptorType.PERSON_TAX));
+        
+        legalEntityDao.add(legalEntity);
+        marketSubjectLogic.createLegelEntitySubject(legalEntity);
+        
+        return MarketLegalEntityDto.createWithRequisites(legalEntity);
+    }
+
+сначала мы просто создает объект -
+
+MarketLegalEntity legalEntity = MarketLegalEntityUpdateDto.create(legalEntityDto, adminUser);
+
+потом идут строчки которые нашпиговывают его поля разными данными. видишь там везде сеттеры
+
+legalEntity.setServiceDescriptor(createServiceDescriptor(ServiceDescriptorType.SERVICE));
+        legalEntity.setComissionDescriptor(createServiceDescriptor(ServiceDescriptorType.COMISSION));
+        legalEntity.setTaxDescriptor(createServiceDescriptor(ServiceDescriptorType.LEGAL_TAX));
+        legalEntity.setUserTaxDescriptor(createServiceDescriptor(ServiceDescriptorType.PERSON_TAX));
+
+и дальше когда объект содержит все нужные данные -
+
+legalEntityDao.add(legalEntity);
+
+мы добавляем его в базу.
+
+Андрей Брат Калининград, [07.11.19 19:41]
+public MarketLegalEntityDto activate(Long id) {
+        AdminUser adminUser = getCurrentAdmin();
+        MarketLegalEntity legalEntity = getById(id);
+        legalEntity.setActive(true);
+        legalEntity.setLastUpdate(new Date());
+        legalEntity.setLastUpdateAdmin(adminUser);
+        legalEntityDao.update(legalEntity);
+        legalEntity = getById(id);
+        return MarketLegalEntityDto.create(legalEntity);
+    }
