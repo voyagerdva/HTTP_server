@@ -1,4 +1,5 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
+import re
 class myHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
@@ -15,8 +16,23 @@ class myHandler(BaseHTTPRequestHandler):
 
         message = file.read()
         file.close()
-        self.wfile.write(bytes(message, "utf-8"))
+        self.wfile.write(bytes(message, "utf8"))
         return
+
+    def do_POST(self):
+        self.send_response(301)
+        self.send_header('Location','/support')
+        self.end_headers()
+        path = self.path
+        #Обработчик подписки
+        if path == "/email":
+            content_len = int(self.headers.get('Content-Length'))
+            post = self.rfile.read(content_len)
+            email = re.split(r"email=",str(post))[1]
+            email = re.sub(r"\'","",email)
+            print(email)
+        return
+
 
 server = HTTPServer(('127.0.0.1', 8081), myHandler)
 server.serve_forever()
