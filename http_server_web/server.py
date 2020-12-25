@@ -24,7 +24,6 @@ class myHandler(BaseHTTPRequestHandler):
         self.send_header('Location','/support')
         self.end_headers()
         path = self.path
-        #Обработчик подписки
         if path == "/email":
             content_len = int(self.headers.get('Content-Length'))
             post = self.rfile.read(content_len)
@@ -32,7 +31,6 @@ class myHandler(BaseHTTPRequestHandler):
             email = re.sub(r"\'","",email)
             print(email)
         return
-
 
 server = HTTPServer(('192.168.1.137', 8081), myHandler)
 server.serve_forever()
